@@ -23,6 +23,8 @@ Production-grade daily server audit tool for Ubuntu 22.04/24.04 servers. Collect
 
 ```bash
 # Clone and install
+sudo apt install -y python3-pip git rclone
+sudo apt update && sudo apt upgrade -y
 git clone https://github.com/memarzade-dev/ubuntu-server-audit.git
 cd ubuntu-server-audit
 sudo bash install.sh
