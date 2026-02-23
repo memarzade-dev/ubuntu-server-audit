@@ -1,6 +1,6 @@
 # Ubuntu Server Professional Audit Tool
 
-[![CI](https://github.com/yourname/ubuntu-server-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/yourname/ubuntu-server-audit/actions/workflows/ci.yml)
+[![CI](https://github.com/memarzade-dev/ubuntu-server-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/memarzade-dev/ubuntu-server-audit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Ubuntu 22.04](https://img.shields.io/badge/Ubuntu-22.04-orange)](https://releases.ubuntu.com/22.04/)
 [![Ubuntu 24.04](https://img.shields.io/badge/Ubuntu-24.04-orange)](https://releases.ubuntu.com/24.04/)
@@ -23,7 +23,7 @@ Production-grade daily server audit tool for Ubuntu 22.04/24.04 servers. Collect
 
 ```bash
 # Clone and install
-git clone https://github.com/yourname/ubuntu-server-audit.git
+git clone https://github.com/memarzade-dev/ubuntu-server-audit.git
 cd ubuntu-server-audit
 sudo bash install.sh
 
