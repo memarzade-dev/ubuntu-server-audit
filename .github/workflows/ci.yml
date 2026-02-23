@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  syntax-and-lint:
+    name: Syntax Check & Lint
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Syntax check (py_compile)
+        run: python -m py_compile audit.py
+
+      - name: Install flake8
+        run: pip install flake8
+
+      - name: Lint with flake8
+        run: |
+          # Stop on syntax errors and undefined names
+          flake8 audit.py --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Warn on complexity and style (non-blocking)
+          flake8 audit.py --count --exit-zero --max-complexity=15 --max-line-length=120 --statistics
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: ShellCheck install.sh
+        uses: ludeeus/action-shellcheck@2.0.0
+        with:
+          scandir: "."
+          additional_files: "install.sh uninstall.sh"
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run unit tests
+        run: python -m pytest tests/ -v --tb=short
+
+  docs-check:
+    name: Documentation Check
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify required files exist
+        run: |
+          REQUIRED_FILES=(
+            "README.md"
+            "LICENSE"
+            "REQUIREMENTS.md"
+            "ASSUMPTIONS.md"
+            "DECISIONS.md"
+            "ACCEPTANCE.md"
+            "VERIFY.md"
+            "TREE.md"
+            ".gitignore"
+            ".editorconfig"
+            "audit.py"
+            "install.sh"
+            "uninstall.sh"
+          )
+          MISSING=0
+          for f in "${REQUIRED_FILES[@]}"; do
+            if [[ ! -f "$f" ]]; then
+              echo "MISSING: $f"
+              MISSING=$((MISSING + 1))
+            else
+              echo "OK: $f"
+            fi
+          done
+          if [[ $MISSING -gt 0 ]]; then
+            echo "FAIL: $MISSING required files missing"
+            exit 1
+          fi
+          echo "All required files present."
+
+      - name: Check for forbidden patterns
+        run: |
+          # No TODO/FIXME/placeholder stubs in production code
+          if grep -rn 'TODO\|FIXME\|HACK\|XXX\|left as an exercise\|fill later' audit.py; then
+            echo "FAIL: found placeholder/TODO in audit.py"
+            exit 1
+          fi
+          # No vnstat -u (removed in 2.x)
+          if grep -n 'vnstat.*-u\b' audit.py; then
+            echo "FAIL: found vnstat -u in audit.py"
+            exit 1
+          fi
+          echo "No forbidden patterns found."
